@@ -89,6 +89,33 @@ class BaseLinearModel(ABC):
             return self.alpha * np.sign(w)
         return np.zeros_like(w)
 
+    def _fit_gradient(self, X, y):
+        """Общий градиентный спуск: веса шаг за шагом двигаются против наклона."""
+        self.coef_ = np.zeros(X.shape[1])
+        self.intercept_ = 0.0
+        self.loss_history_ = []
+
+        for i in range(self.max_iter):
+            dw, db = self._gradient(X, y)
+            self.coef_ = self.coef_ - self.learning_rate * dw
+            if self.fit_intercept:
+                self.intercept_ = self.intercept_ - self.learning_rate * db
+
+            loss = self._loss(X, y)
+            if not np.isfinite(loss):
+                raise ValueError(
+                    f"обучение разошлось на итерации {i}: уменьшите learning_rate"
+                )
+            self.loss_history_.append(loss)
+
+            if self.verbose and i % 100 == 0:
+                print(f"итерация {i}: потеря {loss:.6f}")
+
+            if i > 0 and abs(self.loss_history_[-2] - loss) < self.tol:
+                break
+
+        self.n_iter_ = len(self.loss_history_)
+
     @abstractmethod
     def fit(self, X, y): ...
 
