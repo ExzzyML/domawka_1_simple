@@ -4,6 +4,9 @@ from abc import ABC, abstractmethod
 class BaseLinearModel(ABC):
     """Общий родитель линейных моделей: настройки, проверки, обучение спуском."""
 
+    _solvers = ("gradient",)
+    _penalties = (None, "l1", "l2")
+
     def __init__(
         self,
         fit_intercept=True,
@@ -25,6 +28,30 @@ class BaseLinearModel(ABC):
         self.tol = tol
         self.verbose = verbose
         self.random_state = random_state
+
+    def _check_params(self):
+        if self.solver not in self._solvers:
+            raise ValueError(
+                f"solver={self.solver!r} не поддерживается, доступны: {self._solvers}"
+            )
+        if self.penalty not in self._penalties:
+            raise ValueError(
+                f"penalty={self.penalty!r} не поддерживается, доступны: {self._penalties}"
+            )
+        if not self.learning_rate > 0:
+            raise ValueError(
+                f"learning_rate должен быть больше 0, получено {self.learning_rate}"
+            )
+        if not isinstance(self.max_iter, int) or self.max_iter < 1:
+            raise ValueError(
+                f"max_iter должен быть целым числом не меньше 1, получено {self.max_iter}"
+            )
+        if not self.tol >= 0:
+            raise ValueError(f"tol не может быть отрицательным, получено {self.tol}")
+        if not self.alpha >= 0:
+            raise ValueError(
+                f"alpha не может быть отрицательным, получено {self.alpha}"
+            )
 
     @abstractmethod
     def fit(self, X, y): ...
