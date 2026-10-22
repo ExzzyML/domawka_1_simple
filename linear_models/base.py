@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+import numpy as np
+
 
 class BaseLinearModel(ABC):
     """Общий родитель линейных моделей: настройки, проверки, обучение спуском."""
@@ -52,6 +54,24 @@ class BaseLinearModel(ABC):
             raise ValueError(
                 f"alpha не может быть отрицательным, получено {self.alpha}"
             )
+
+    @staticmethod
+    def _check_data(X, y):
+        X = np.asarray(X, dtype=float)
+        y = np.asarray(y, dtype=float)
+        if X.ndim != 2:
+            raise ValueError(
+                f"X должен быть двумерным массивом, получено ndim={X.ndim}"
+            )
+        if y.ndim != 1:
+            raise ValueError(
+                f"y должен быть одномерным массивом, получено ndim={y.ndim}"
+            )
+        if len(X) != len(y):
+            raise ValueError(f"разное число объектов: в X {len(X)}, в y {len(y)}")
+        if not (np.all(np.isfinite(X)) and np.all(np.isfinite(y))):
+            raise ValueError("в X или y есть NaN или бесконечность")
+        return X, y
 
     @abstractmethod
     def fit(self, X, y): ...
