@@ -73,6 +73,22 @@ class BaseLinearModel(ABC):
             raise ValueError("в X или y есть NaN или бесконечность")
         return X, y
 
+    def _penalty(self):
+        w = self.coef_
+        if self.penalty == "l2":
+            return self.alpha * np.sum(w**2)
+        if self.penalty == "l1":
+            return self.alpha * np.sum(np.abs(w))
+        return 0.0
+
+    def _penalty_gradient(self):
+        w = self.coef_
+        if self.penalty == "l2":
+            return 2 * self.alpha * w
+        if self.penalty == "l1":
+            return self.alpha * np.sign(w)
+        return np.zeros_like(w)
+
     @abstractmethod
     def fit(self, X, y): ...
 
